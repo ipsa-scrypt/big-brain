@@ -19,6 +19,7 @@ export function Submit({
 	// states
 	const [placeholder, setPlaceholder] = useState<string>('Pose moi ta question...');
 	const [apiError, setApiError] = useState<string>(''); // new state variable for API errors
+	const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
 
 	// effects
 	const handleSubmit = async (event: { preventDefault(): void }): Promise<void> => {
@@ -29,8 +30,22 @@ export function Submit({
 			setPlaceholder("Je me ferais un plaisir de t'aider !");
 			setShowOutputs(false);
 		} else {
+			setIsSubmitting(true);
+			setShowOutputs(true);
+			// Set the submittedRequest state with only the user's question immediately after the form is submitted
+			setSubmittedRequest({ request: inputValue, pdfData: [] });
+
 			let pdfData: Record<string, string>[] = [];
+
 			try {
+				const loaderContainer = document.querySelector('.loader-container');
+				const sendBtn = document.querySelector('.send-btn');
+				const outputDiv = document.querySelector('.output');
+				loaderContainer?.classList.add('loader-container-appear');
+				sendBtn?.classList.add('send-btn-disappear');
+
+				outputDiv?.classList.add('output-appear');
+
 				const res = await sendToSushiAPI(inputValue);
 				// if res is object containing a files key
 				if (res.files) {
@@ -52,11 +67,14 @@ export function Submit({
 			}
 
 			if (!apiError) {
+				// Add the PDF data to the submittedRequest state after it is fetched from the API
 				setSubmittedRequest({ request: inputValue, pdfData });
 				setInputValue('');
 				setPlaceholder('Pose moi ta question...');
 				setShowOutputs(true);
 			}
+
+			setIsSubmitting(false);
 		}
 	};
 
@@ -72,6 +90,7 @@ export function Submit({
 						value={inputValue}
 						onChange={(event) => setInputValue(event.target.value)}
 						className="input-text"
+						disabled={isSubmitting}
 					/>
 					<button onClick={handleSubmit} className="send-btn" type="submit">
 						<img
@@ -80,6 +99,9 @@ export function Submit({
 							className="button-img"
 						></img>
 					</button>
+					<div className="loader-container">
+						<span className="loader"></span>
+					</div>
 				</div>
 			</form>
 		</div>

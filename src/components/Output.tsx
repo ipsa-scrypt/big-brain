@@ -40,7 +40,11 @@ const createPDFLink = (pdf: Record<string, string>) => {
 const displayPDFs = (pdfData: Record<string, string>[]) => {
 	console.log('displayPDFs', pdfData);
 	const container = document.querySelector('.bb-sent-files-container');
+	const loaderContainer = document.querySelector('.loader-container');
+	const sendBtn = document.querySelector('.send-btn');
 	if (container) {
+		loaderContainer?.classList.remove('loader-container-appear');
+		sendBtn?.classList.remove('send-btn-disappear');
 		container.textContent = '';
 
 		for (const pdf of pdfData) {
@@ -62,7 +66,9 @@ export const Outputs = ({
 	submittedRequest: string;
 }) => {
 	useEffect(() => {
-		displayPDFs(pdfData);
+		if (pdfData.length > 0) {
+			displayPDFs(pdfData);
+		}
 	}, [pdfData]); // Dependency array includes pdfData so effect runs whenever pdfData changes
 
 	// render
@@ -72,11 +78,17 @@ export const Outputs = ({
 				<img src={'././img/user.png'} alt="student-logo" className="student-logo"></img>
 				<p className="student-question">{submittedRequest}</p>
 			</div>
-			<div className="bb-answer-container">
-				<img src={'././img/brain.png'} alt="brain-logo" className="ai-logo"></img>
-				<p className="bb-answer">Voici ce que j'ai trouvé en lien avec ce que tu as demandé :</p>
-			</div>
-			<div className="bb-sent-files-container"></div>
+			{pdfData.length > 0 && (
+				<>
+					<div className="bb-answer-container">
+						<img src={'././img/brain.png'} alt="brain-logo" className="ai-logo"></img>
+						<p className="bb-answer">
+							Voici ce que j'ai trouvé en lien avec ce que tu as demandé :
+						</p>
+					</div>
+					<div className="bb-sent-files-container"></div>
+				</>
+			)}
 		</div>
 	);
 };
